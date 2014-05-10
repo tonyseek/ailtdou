@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/login.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div class="login-banner">
+    <a href="#">Login with Douban Account</a>
+  </div>
+{% endblock %}
