@@ -1,4 +1,4 @@
-Flask-Script==2.0.3
+Flask-Script==1.0.0
 Flask==0.10.1
 gevent==1.0.1
 greenlet==0.4.2
