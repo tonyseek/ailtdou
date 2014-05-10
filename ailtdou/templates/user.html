@@ -6,4 +6,5 @@
 {% block content %}
   <img src="{{ user.data.avatar }}" alt="">
   {{ user.data.name }} ({{ user.data.uid }})
+  <a href="{{ url_for('user.logout') }}">Logout</a>
 {% endblock %}

@@ -13,6 +13,12 @@ def login():
     return oauth.douban.authorize(callback=url)
 
 
+@bp.route('/logout')
+def logout():
+    session.pop('douban_token', None)
+    return redirect(url_for('main.home'))
+
+
 @bp.route('/login/authorized')
 @oauth.douban.authorized_handler
 def authorized(resp):
