@@ -36,5 +36,6 @@ pip-log.txt
 # Sphinx
 docs/_build
 
-# Honcho
+# App
 .env
+dev.cfg
