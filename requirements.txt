@@ -1,2 +1,6 @@
+gevent==1.0.1
+greenlet==0.4.2
+inbox==0.0.5
+Logbook==0.6.0
 pip-tools==0.3.4
 wheel==0.23.0
