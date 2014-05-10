@@ -1,6 +1,12 @@
+Flask-Script==2.0.3
+Flask==0.10.1
 gevent==1.0.1
 greenlet==0.4.2
 inbox==0.0.5
+itsdangerous==0.24
+Jinja2==2.7.2
 Logbook==0.6.0
+MarkupSafe==0.23
 pip-tools==0.3.4
+Werkzeug==0.9.4
 wheel==0.23.0
