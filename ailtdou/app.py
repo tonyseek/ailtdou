@@ -1,6 +1,8 @@
 from flask import Flask
 from werkzeug.utils import import_string
 
+from .ext import oauth
+
 
 blueprints = [
     'ailtdou.main.views.bp',
@@ -13,6 +15,8 @@ def create_app():
 
     app.config.from_pyfile('app.cfg')
     app.config.from_envvar('AILTDOU_CONFIG', silent=True)
+
+    oauth.init_app(app)
 
     register_blueprints(app, blueprints)
 
