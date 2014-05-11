@@ -1,7 +1,7 @@
 from flask import Flask
 from werkzeug.utils import import_string
 
-from .ext import oauth
+from .ext import db, login_manager, oauth
 
 
 blueprints = [
@@ -16,6 +16,8 @@ def create_app():
     app.config.from_pyfile('app.cfg')
     app.config.from_envvar('AILTDOU_CONFIG', silent=True)
 
+    db.init_app(app)
+    login_manager.init_app(app)
     oauth.init_app(app)
 
     register_blueprints(app, blueprints)

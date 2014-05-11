@@ -1,6 +1,10 @@
+from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.login import LoginManager
 from flask.ext.oauthlib.client import OAuth
 
 
+db = SQLAlchemy()
+login_manager = LoginManager()
 oauth = OAuth()
 
 # registers OAuth app
