@@ -7,4 +7,9 @@
   <img src="{{ user.get_avatar_url() }}" alt="">
   {{ user.name }} ({{ user.uid }})
   <a href="{{ url_for('user.logout') }}">Logout</a>
+  <div>
+    <blockquote>
+      {{ user.secret_id }}@ailtdou.szulabs.org
+    </blockquote>
+  </div>
 {% endblock %}

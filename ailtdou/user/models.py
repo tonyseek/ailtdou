@@ -1,7 +1,8 @@
-from flask import request
+from flask import request, current_app
 from flask.ext.login import UserMixin, current_user
 from flask.ext.oauthlib.client import OAuthException
 from werkzeug.utils import cached_property
+from hashids import Hashids
 
 from ailtdou.ext import db, oauth, login_manager
 
@@ -60,6 +61,19 @@ class User(UserMixin, db.Model):
             db.session.add(user)
 
         return user
+
+    @cached_property
+    def secret_id(self):
+        hashids = Hashids(current_app.secret_key)
+        return hashids.encrypt(self.id)
+
+    @classmethod
+    def from_secret_id(cls, secret_id):
+        hashids = Hashids(current_app.secret_key)
+        unpacked_data = hashids.decrypt(secret_id)
+        if len(unpacked_data) != 1:
+            return
+        return cls.query.get(unpacked_data[0])
 
 
 @login_manager.user_loader
