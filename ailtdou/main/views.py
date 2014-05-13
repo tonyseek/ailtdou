@@ -1,6 +1,5 @@
-from flask import Blueprint, render_template, session
-
-from ailtdou.ext import oauth
+from flask import Blueprint, render_template
+from flask.ext.login import current_user
 
 
 bp = Blueprint('main', __name__)
@@ -8,7 +7,6 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def home():
-    if 'douban_token' in session:
-        user = oauth.douban.get('user/~me')
-        return render_template('user.html', user=user)
-    return render_template('login.html')
+    if current_user.is_anonymous():
+        return render_template('login.html')
+    return render_template('user.html', user=current_user)

@@ -1,7 +1,9 @@
-from flask import Blueprint, url_for, session, redirect
+from flask import Blueprint, url_for, redirect
+from flask.ext.login import login_user, logout_user
 from flask.ext.oauthlib.client import OAuthException
 
-from ailtdou.ext import oauth
+from ailtdou.ext import oauth, db
+from ailtdou.user.models import User, AccessDenied
 
 
 bp = Blueprint('user', __name__)
@@ -15,23 +17,22 @@ def login():
 
 @bp.route('/logout')
 def logout():
-    session.pop('douban_token', None)
+    logout_user()
     return redirect(url_for('main.home'))
 
 
 @bp.route('/login/authorized')
 @oauth.douban.authorized_handler
-def authorized(resp):
-    if resp is None:
+def authorized(response):
+    try:
+        user = User.from_oauth(response)
+    except AccessDenied as e:
         return 'Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description'])
-    if isinstance(resp, OAuthException):
-        return 'Authorize Error: %s' % resp.message
-    session['douban_token'] = (resp['access_token'], '')
+            e.reason, e.description)
+    except OAuthException as e:
+        return 'Authorize Error: %s' % response.message
+
+    db.session.commit()
+    login_user(user, remember=True)
+
     return redirect(url_for('main.home'))
-
-
-@oauth.douban.tokengetter
-def get_douban_oauth_token():
-    return session.get('douban_token')

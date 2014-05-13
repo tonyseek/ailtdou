@@ -3,3 +3,5 @@ SECRET_KEY = ''
 
 DOUBAN_CONSUMER_KEY = ''
 DOUBAN_CONSUMER_SECRET = ''
+
+SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/ailtdou-dev.sqlite'
