@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.Unicode, nullable=False)
     user_info_url = 'user/~me'
+    statuses_url = 'https://api.douban.com/shuo/v2/statuses/'
 
     @cached_property
     def user_info(self):
@@ -74,6 +75,12 @@ class User(UserMixin, db.Model):
         if len(unpacked_data) != 1:
             return
         return cls.query.get(unpacked_data[0])
+
+    def post_to_douban(self, text):
+        text = text.strip()
+        data = {'source': oauth.douban.consumer_key, 'text': text}
+        return oauth.douban.post(
+            self.statuses_url, data=data, token=(self.access_token, ''))
 
 
 @login_manager.user_loader
