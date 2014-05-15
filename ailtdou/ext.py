@@ -1,11 +1,13 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from flask.ext.oauthlib.client import OAuth
+from raven.contrib.flask import Sentry
 
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 oauth = OAuth()
+sentry = Sentry()
 
 # registers OAuth app
 oauth.remote_app(
