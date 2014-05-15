@@ -3,7 +3,7 @@ from email.utils import parseaddr
 
 from inbox import Inbox
 
-from ailtdou.ext import db
+from ailtdou.ext import db, capture_exception
 from ailtdou.user.models import User
 
 
@@ -22,10 +22,12 @@ inbox = Inbox()
 
 @inbox.collate
 def email_to_douban(to, sender, subject, body):
-    _, address = parseaddr(to)
-    secret_id, _ = address.rsplit('@', 1)
-    user = User.from_secret_id(secret_id)
-    if user:
+    with capture_exception(reraise=False):
+        _, address = parseaddr(to)
+        secret_id, _ = address.rsplit('@', 1)
+        user = User.from_secret_id(secret_id)
+        if not user:
+            return
         text = body.strip()[:140]
         # save to database
         activity = Activity(user_id=user.id, subject=subject, text=text)

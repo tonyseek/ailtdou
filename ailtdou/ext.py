@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from flask.ext.oauthlib.client import OAuth
@@ -19,3 +21,13 @@ oauth.remote_app(
     access_token_url='https://www.douban.com/service/auth2/token',
     authorize_url='https://www.douban.com/service/auth2/auth',
     access_token_method='POST')
+
+
+@contextmanager
+def capture_exception(reraise=True):
+    try:
+        yield
+    except:
+        sentry.captureException()
+        if reraise:
+            raise
