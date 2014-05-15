@@ -17,7 +17,8 @@ class User(UserMixin, db.Model):
 
     @cached_property
     def user_info(self):
-        response = oauth.douban.get(self.user_info_url)
+        response = oauth.douban.get(
+            self.user_info_url, token=(self.access_token, ''))
         if response.status == 200:
             return response.data
         raise OAuthException('invalid response')
