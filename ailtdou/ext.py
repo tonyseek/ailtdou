@@ -19,10 +19,12 @@ douban.register_to(oauth)
 
 
 @contextmanager
-def capture_exception(reraise=True):
+def capture_exception(*exceptions, **kwargs):
+    exceptions = exceptions or (Exception,)
+    reraise = kwargs.get('reraise', True)
     try:
         yield
-    except:
+    except exceptions:
         sentry.captureException()
         if reraise:
             raise
