@@ -73,7 +73,7 @@ def extract_text(message):
     }.get(transfer_encoding)
     if transfer_decoder is not None:
         payload = transfer_decoder(payload)
-    elif transfer_encoding is not None:
+    elif transfer_encoding not in (None, '7bit', '8bit'):
         raise ValueError('unknown transfer encoding in message')
 
     # decodes to unicode
