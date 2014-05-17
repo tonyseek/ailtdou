@@ -1,7 +1,8 @@
+import quopri
+import base64
 from datetime import datetime
 from email import message_from_string
 from email.utils import parseaddr
-from quopri import decodestring as quopri_decode
 
 from inbox import Inbox
 from jinja2.filters import do_striptags as striptags
@@ -25,7 +26,7 @@ inbox = Inbox()
 
 @inbox.collate
 def email_to_douban(to, sender, body):
-    with capture_exception(reraise=False):
+    with capture_exception(ValueError, reraise=False):
         _, address = parseaddr(to)
         secret_id, _ = address.rsplit('@', 1)
         user = User.from_secret_id(secret_id)
@@ -33,10 +34,7 @@ def email_to_douban(to, sender, body):
             return
 
         message = message_from_string(body)
-        try:
-            text = extract_text(message)
-        except ValueError:
-            return
+        text = extract_text(message)
 
         # save to database
         activity = Activity(user_id=user.id, subject='unknown', text=text)
@@ -57,16 +55,29 @@ def extract_text(message):
 
         chosen = next(text_payload_list, next(rich_payload_list, None))
         if not chosen:
-            raise ValueError('unknown content type in message')
+            raise ValueError('need plain text or html message')
     else:
         chosen = message
 
     payload = chosen.get_payload()
-    if chosen.get_content_type() == 'text/html':
-        payload = quopri_decode(payload)
+    content_charset = chosen.get_content_charset()
+    transfer_encoding = chosen.get('Content-Transfer-Encoding')
 
-    text = payload.decode(chosen.get_content_charset())
+    # decodes with transfer encoding
+    transfer_decoder = {
+        'quoted-printable': quopri.decodestring,
+        'base64': base64.decodestring,
+    }.get(transfer_encoding)
+    if transfer_decoder is not None:
+        payload = transfer_decoder(payload)
+    elif transfer_encoding is not None:
+        raise ValueError('unknown transfer encoding in message')
+
+    # decodes to unicode
+    text = payload.decode(content_charset)
+
+    # strip html tags
     if chosen.get_content_type() == 'text/html':
         text = striptags(text)
 
-    return text
+    return text.strip()
