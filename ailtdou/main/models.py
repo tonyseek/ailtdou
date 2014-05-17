@@ -26,7 +26,7 @@ inbox = Inbox()
 
 @inbox.collate
 def email_to_douban(to, sender, body):
-    with capture_exception(ValueError, reraise=False):
+    with capture_exception(reraise=False):
         _, address = parseaddr(to)
         secret_id, _ = address.rsplit('@', 1)
         user = User.from_secret_id(secret_id)
@@ -34,7 +34,10 @@ def email_to_douban(to, sender, body):
             return
 
         message = message_from_string(body)
-        text = extract_text(message)
+        with capture_exception(ValueError):
+            text = extract_text(message)
+        if not text:
+            return
 
         # save to database
         activity = Activity(user_id=user.id, subject='unknown', text=text)
