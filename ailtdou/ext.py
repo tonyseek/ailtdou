@@ -15,7 +15,10 @@ login_manager = LoginManager()
 oauth = OAuth()
 sentry = Sentry()
 
-douban.register_to(oauth)
+douban.register_to(oauth, scope=[
+    'douban_basic_common',
+    'shuo_basic_r',
+    'shuo_basic_w'])
 
 
 @contextmanager
