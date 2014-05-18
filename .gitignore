@@ -36,6 +36,9 @@ pip-log.txt
 # Sphinx
 docs/_build
 
+# Finder
+.DS_Store
+
 # App
 .env
 dev.cfg
