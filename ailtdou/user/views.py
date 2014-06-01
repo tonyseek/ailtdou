@@ -15,7 +15,7 @@ def access_token_expired(error):
     if not user:
         raise RuntimeError('user not found %d' % error.user_id)
     logout_user()
-    return redirect(url_for('.login'))
+    return redirect(url_for('user.login'))
 
 
 @bp.route('/login')
