@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.Unicode, nullable=False)
+    refresh_token = db.Column(db.Unicode, nullable=True)
     user_info_url = 'user/~me'
     statuses_url = 'https://api.douban.com/shuo/v2/statuses/'
 
@@ -58,13 +59,12 @@ class User(UserMixin, db.Model):
 
         user_id = response['douban_user_id']
         access_token = response['access_token']
+        refresh_token = response['refresh_token']
 
-        user = cls.query.get(user_id)
-        if user:
-            user.access_token = access_token
-        else:
-            user = cls(id=user_id, access_token=access_token)
-            db.session.add(user)
+        user = cls.query.get(user_id) or cls(id=user_id)
+        user.access_token = access_token
+        user.refresh_token = refresh_token
+        db.session.add(user)
 
         return user
 
