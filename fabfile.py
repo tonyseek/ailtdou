@@ -8,6 +8,7 @@ remote_user = 'ailtdou'
 remote_proc = 'ailtdou:*'
 
 python_init = 'eval "$(pyenv init -)"'
+honcho_init = 'honcho -e production/.env run '
 
 
 @hosts(remote_host)
@@ -23,7 +24,7 @@ def deploy():
         run('pip install -r requirements.txt')
         get('production/*.cfg', 'production/%(basename)s.last')
         put('production/*.cfg', 'production/', use_sudo=True)
-        with prefix(python_init), prefix('source production/.env'):
-            sudo('python manage.py clean', user=remote_user)
-            sudo('python manage.py db upgrade', user=remote_user)
+        with prefix(python_init):
+            sudo(honcho_init + 'python manage.py clean', user=remote_user)
+            sudo(honcho_init + 'python manage.py db upgrade', user=remote_user)
     sudo('supervisorctl restart %s' % remote_proc)
