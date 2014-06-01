@@ -2,6 +2,7 @@
 
 from flask.ext.script import Manager
 from flask.ext.script.commands import Clean, ShowUrls
+from flask.ext.migrate import MigrateCommand
 
 from ailtdou.app import create_app
 from ailtdou.main.models import inbox as _inbox
@@ -12,6 +13,7 @@ manager = Manager(app)
 
 manager.add_command(Clean())
 manager.add_command(ShowUrls())
+manager.add_command('db', MigrateCommand)
 
 
 @manager.command

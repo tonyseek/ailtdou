@@ -1,7 +1,7 @@
 from flask import Flask
 from werkzeug.utils import import_string
 
-from .ext import db, login_manager, oauth, sentry
+from .ext import db, migrate, login_manager, oauth, sentry
 
 
 blueprints = [
@@ -17,6 +17,7 @@ def create_app():
     app.config.from_envvar('AILTDOU_CONFIG', silent=True)
 
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     oauth.init_app(app)
     sentry.init_app(app)

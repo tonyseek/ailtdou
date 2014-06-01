@@ -20,4 +20,6 @@ def deploy():
         run('pip install -r requirements.txt')
         get('production/*.cfg', 'production/%(basename)s.cfg.last')
         put('production/*.cfg', 'production/', use_sudo=True)
+        with cd('production'):
+            sudo('honcho run ./manage.py db upgrade', user=remote_user)
     sudo('supervisorctl restart %s' % remote_proc)

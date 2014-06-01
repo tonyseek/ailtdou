@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.migrate import Migrate
 from flask.ext.login import LoginManager
 from flask.ext.oauthlib.client import OAuth
 from flask.ext.oauthlib.contrib.apps import douban
@@ -11,6 +12,7 @@ __all__ = ['db', 'login_manager', 'oauth', 'sentry', 'capture_exception']
 
 
 db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
 oauth = OAuth()
 sentry = Sentry()
