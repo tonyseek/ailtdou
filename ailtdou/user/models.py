@@ -1,6 +1,7 @@
 from flask import request, current_app
 from flask.ext.login import UserMixin, current_user
 from flask.ext.oauthlib.client import OAuthException
+
 from werkzeug.utils import cached_property
 from hashids import Hashids
 
@@ -21,6 +22,10 @@ class User(UserMixin, db.Model):
             self.user_info_url, token=(self.access_token, ''))
         if response.status == 200:
             return response.data
+        # 106 means access_token_has_expired
+        if response.data.code == 106:
+            raise AccessTokenExpired(
+                response.message, response.type, response.data, self.id)
         raise OAuthException('invalid response')
 
     @property
@@ -52,13 +57,13 @@ class User(UserMixin, db.Model):
         if isinstance(response, OAuthException):
             raise response
 
+        user_id = response['douban_user_id']
         access_token = response['access_token']
-        user_info = oauth.douban.get(
-            cls.user_info_url, token=(access_token, ''))
-        user_id = user_info.data['id']
 
         user = cls.query.get(user_id)
-        if not user:
+        if user:
+            user.access_token = access_token
+        else:
             user = cls(id=user_id, access_token=access_token)
             db.session.add(user)
 
@@ -102,3 +107,11 @@ class AccessDenied(Exception):
     def __init__(self, reason, description):
         self.reason = reason
         self.description = description
+
+
+class AccessTokenExpired(OAuthException):
+    """The access token has expired."""
+
+    def __init__(self, message, type, data, user_id):
+        super(AccessTokenExpired, self).__init__(message, type, data)
+        self.user_id = user_id

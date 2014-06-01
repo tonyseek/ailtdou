@@ -3,10 +3,19 @@ from flask.ext.login import login_user, logout_user
 from flask.ext.oauthlib.client import OAuthException
 
 from ailtdou.ext import oauth, db
-from ailtdou.user.models import User, AccessDenied
+from ailtdou.user.models import User, AccessDenied, AccessTokenExpired
 
 
 bp = Blueprint('user', __name__)
+
+
+@bp.app_errorhandler(AccessTokenExpired)
+def access_token_expired(error):
+    user = User.query.get(error.user_id)
+    if not user:
+        raise RuntimeError('user not found %d' % error.user_id)
+    logout_user()
+    return redirect(url_for('.login'))
 
 
 @bp.route('/login')
