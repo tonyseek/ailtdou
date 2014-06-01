@@ -24,8 +24,7 @@ class User(UserMixin, db.Model):
             return response.data
         # 106 means access_token_has_expired
         if response.data['code'] == 106:
-            raise AccessTokenExpired(
-                response.message, response.type, response.data, self.id)
+            raise AccessTokenExpired(response, self.id)
         raise OAuthException('invalid response')
 
     @property
@@ -109,9 +108,9 @@ class AccessDenied(Exception):
         self.description = description
 
 
-class AccessTokenExpired(OAuthException):
+class AccessTokenExpired(Exception):
     """The access token has expired."""
 
-    def __init__(self, message, type, data, user_id):
-        super(AccessTokenExpired, self).__init__(message, type, data)
+    def __init__(self, oauth_exception, user_id):
+        self.oauth_exception = oauth_exception
         self.user_id = user_id
