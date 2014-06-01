@@ -23,7 +23,7 @@ class User(UserMixin, db.Model):
         if response.status == 200:
             return response.data
         # 106 means access_token_has_expired
-        if response.data.code == 106:
+        if response.data['code'] == 106:
             raise AccessTokenExpired(
                 response.message, response.type, response.data, self.id)
         raise OAuthException('invalid response')
