@@ -30,6 +30,7 @@ py==1.4.20
 pycrypto==2.6.1
 pyflakes==0.8.1
 pytest==2.5.2
+python-envcfg==0.1.0
 raven==4.2.1
 SQLAlchemy==0.9.4
 Werkzeug==0.9.4
