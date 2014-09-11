@@ -15,10 +15,10 @@ greenlet==0.4.2
 gunicorn==18.0
 hashids==1.0.0
 honcho==0.5.0
-inbox==0.0.5
+-e git://github.com/kennethreitz/inbox.py@551b4f44b144564504c687cebdb4c543cb8e9adf#egg=inbox-master
 itsdangerous==0.24
 Jinja2==2.7.2
-Logbook==0.6.0
+Logbook==0.7.0
 Mako==0.9.1
 MarkupSafe==0.23
 mccabe==0.2.1
