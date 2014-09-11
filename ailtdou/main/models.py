@@ -25,7 +25,7 @@ inbox = Inbox()
 
 
 @inbox.collate
-def email_to_douban(to, sender, body):
+def email_to_douban(to, sender, subject, body):
     with capture_exception(reraise=False):
         _, address = parseaddr(to)
         secret_id, _ = address.rsplit('@', 1)
@@ -40,7 +40,7 @@ def email_to_douban(to, sender, body):
             return
 
         # save to database
-        activity = Activity(user_id=user.id, subject='unknown', text=text)
+        activity = Activity(user_id=user.id, subject=subject, text=text)
         db.session.add(activity)
         db.session.commit()
         # post with Douban API
