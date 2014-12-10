@@ -1,2 +1,2 @@
-web: gunicorn -w $AILTDOU_WORKNUM -b 127.0.0.1:$PORT wsgi:app
-mail: python manage.py inbox -p $PORT
+web: python manage.py http -p $PORT
+inbox: python manage.py inbox -p $PORT
