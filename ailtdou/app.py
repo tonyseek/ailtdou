@@ -12,8 +12,6 @@ blueprints = [
 
 def create_app():
     app = Flask(__name__)
-
-    app.config.from_pyfile('app.cfg')
     app.config.from_object('envcfg.json.ailtdou')
 
     db.init_app(app)
