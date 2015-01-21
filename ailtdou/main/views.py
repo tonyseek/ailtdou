@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from flask.ext.login import current_user
+from flask_login import current_user
 
 
 bp = Blueprint('main', __name__)

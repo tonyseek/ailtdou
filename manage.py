@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from flask.ext.script import Manager
-from flask.ext.script.commands import Clean, ShowUrls
-from flask.ext.migrate import MigrateCommand
+from flask_script import Manager
+from flask_script.commands import Clean, ShowUrls
+from flask_migrate import MigrateCommand
 from gunicorn.app.wsgiapp import WSGIApplication
 
 from ailtdou.app import create_app
