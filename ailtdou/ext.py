@@ -1,10 +1,10 @@
 from contextlib import contextmanager
 
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.migrate import Migrate
-from flask.ext.login import LoginManager
-from flask.ext.oauthlib.client import OAuth
-from flask.ext.oauthlib.contrib.apps import douban
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_oauthlib.client import OAuth
+from flask_oauthlib.contrib.apps import douban
 from raven.contrib.flask import Sentry
 
 
