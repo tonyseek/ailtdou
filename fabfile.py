@@ -4,7 +4,7 @@ from fabric.api import cd, run, sudo, hosts
 remote_host = 'szulabs.org'
 remote_repo = '/srv/ailtdou.szulabs.org'
 remote_user = 'ailtdou'
-remote_proc = 'ailtdou'
+remote_proc = ['ailtdou', 'ailtdou-smtp']
 honcho_exec = 'pyenv exec honcho run '
 
 
@@ -15,4 +15,5 @@ def deploy():
         run('pip install -r requirements.txt')
         sudo(honcho_exec + 'python manage.py clean', user=remote_user)
         sudo(honcho_exec + 'python manage.py db upgrade', user=remote_user)
-    sudo('circusctl restart %s' % remote_proc)
+    for proc in remote_proc:
+        sudo('systemctl restart %s' % proc)

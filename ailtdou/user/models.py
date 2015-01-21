@@ -1,11 +1,14 @@
-from flask import request, current_app
-from flask.ext.login import UserMixin, current_user
-from flask.ext.oauthlib.client import OAuthException
+from flask import current_app
+from flask_login import UserMixin, current_user
+from flask_oauthlib.contrib.client.structure import OAuth2Response
 
 from werkzeug.utils import cached_property
 from hashids import Hashids
 
 from ailtdou.ext import db, oauth, login_manager
+
+
+douban = oauth['douban']
 
 
 class User(UserMixin, db.Model):
@@ -19,14 +22,13 @@ class User(UserMixin, db.Model):
 
     @cached_property
     def user_info(self):
-        response = oauth.douban.get(
+        response = douban.get(
             self.user_info_url, token=(self.access_token, ''))
         if response.status == 200:
             return response.data
-        # 106 means access_token_has_expired
         if response.data['code'] == 106:
-            raise AccessTokenExpired(response, self.id)
-        raise OAuthException('invalid response')
+            raise ValueError('access_token_has_expired', response, self.id)
+        raise ValueError('invalid response')
 
     @property
     def uid(self):
@@ -49,23 +51,11 @@ class User(UserMixin, db.Model):
 
     @classmethod
     def from_oauth(cls, response):
-        if response is None:
-            raise AccessDenied(
-                request.args['error_reason'],
-                request.args['error_description'])
-
-        if isinstance(response, OAuthException):
-            raise response
-
         user_id = response['douban_user_id']
-        access_token = response['access_token']
-        refresh_token = response['refresh_token']
-
         user = cls.query.get(user_id) or cls(id=user_id)
-        user.access_token = access_token
-        user.refresh_token = refresh_token
+        user.access_token = response.access_token
+        user.refresh_token = response.refresh_token
         db.session.add(user)
-
         return user
 
     @cached_property
@@ -83,8 +73,8 @@ class User(UserMixin, db.Model):
 
     def post_to_douban(self, text):
         text = text.strip()
-        data = {'source': oauth.douban.consumer_key, 'text': text}
-        return oauth.douban.post(
+        data = {'source': douban.consumer_key, 'text': text}
+        return douban.post(
             self.statuses_url, data=data, token=(self.access_token, ''))
 
 
@@ -93,24 +83,16 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-@oauth.douban.tokengetter
-def get_douban_access_token():
+@douban.tokengetter
+def obtain_token():
     if current_user.is_anonymous():
         return
-    return current_user.access_token, ''
+    return OAuth2Response(
+        access_token=current_user.access_token,
+        refresh_token=current_user.refresh_token)
 
 
-class AccessDenied(Exception):
-    """The exception for access denied."""
-
-    def __init__(self, reason, description):
-        self.reason = reason
-        self.description = description
-
-
-class AccessTokenExpired(Exception):
-    """The access token has expired."""
-
-    def __init__(self, oauth_exception, user_id):
-        self.oauth_exception = oauth_exception
-        self.user_id = user_id
+@douban.tokensaver
+def store_token(token):
+    User.from_oauth(token)
+    db.session.commit()
