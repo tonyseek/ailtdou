@@ -72,7 +72,7 @@ class User(UserMixin, db.Model):
 
     def post_to_douban(self, text):
         text = text.strip()
-        data = {'source': douban.consumer_key, 'text': text}
+        data = {'source': douban.client_id, 'text': text}
         return douban.post('/shuo/v2/statuses/', data=data, token=self.token)
 
 
