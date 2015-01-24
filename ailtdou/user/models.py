@@ -17,18 +17,17 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.Unicode, nullable=False)
     refresh_token = db.Column(db.Unicode, nullable=True)
-    user_info_url = 'user/~me'
-    statuses_url = 'https://api.douban.com/shuo/v2/statuses/'
+
+    @cached_property
+    def token(self):
+        return OAuth2Response(
+            access_token=self.access_token, refresh_token=self.refresh_token)
 
     @cached_property
     def user_info(self):
-        response = douban.get(
-            self.user_info_url, token=(self.access_token, ''))
-        if response.status == 200:
-            return response.data
-        if response.data['code'] == 106:
-            raise ValueError('access_token_has_expired', response, self.id)
-        raise ValueError('invalid response')
+        response = douban.get('v2/user/~me', token=self.token)
+        response.raise_for_status()
+        return response.json()
 
     @property
     def uid(self):
@@ -74,8 +73,7 @@ class User(UserMixin, db.Model):
     def post_to_douban(self, text):
         text = text.strip()
         data = {'source': douban.consumer_key, 'text': text}
-        return douban.post(
-            self.statuses_url, data=data, token=(self.access_token, ''))
+        return douban.post('/shuo/v2/statuses/', data=data, token=self.token)
 
 
 @login_manager.user_loader
@@ -87,9 +85,7 @@ def load_user(user_id):
 def obtain_token():
     if current_user.is_anonymous():
         return
-    return OAuth2Response(
-        access_token=current_user.access_token,
-        refresh_token=current_user.refresh_token)
+    return current_user.token_response
 
 
 @douban.tokensaver
