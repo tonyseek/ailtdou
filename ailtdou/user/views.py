@@ -22,7 +22,7 @@ def logout():
 
 
 @bp.route('/login/authorized')
-def authorized(response):
+def authorized():
     response = douban.authorized_response()
     if not response:
         return 'Access denied: reason=%s error=%s' % (
