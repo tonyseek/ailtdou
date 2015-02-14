@@ -1,7 +1,8 @@
+import time
+
 from flask import current_app
 from flask_login import UserMixin, current_user
 from flask_oauthlib.contrib.client.structure import OAuth2Response
-
 from werkzeug.utils import cached_property
 from hashids import Hashids
 
@@ -17,7 +18,8 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.Unicode, nullable=False)
     refresh_token = db.Column(db.Unicode, nullable=True)
-    expires_in = db.Column(db.Integer, nullable=True)
+    expires_in = db.Column(db.Integer, default=3920)
+    expires_at = db.Column(db.Integer, default=0)
 
     @cached_property
     def user_info(self):
@@ -51,6 +53,7 @@ class User(UserMixin, db.Model):
         user.access_token = response['access_token']
         user.refresh_token = response['refresh_token']
         user.expires_in = response['expires_in']
+        user.expires_at = response['expires_in'] + time.time()
         db.session.add(user)
         return user
 
@@ -59,7 +62,8 @@ class User(UserMixin, db.Model):
         return OAuth2Response(
             access_token=self.access_token,
             refresh_token=self.refresh_token,
-            expires_in=self.expires_in)
+            expires_in=self.expires_in,
+            expires_at=self.expires_at)
 
     @cached_property
     def secret_id(self):
