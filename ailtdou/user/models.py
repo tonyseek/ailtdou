@@ -17,11 +17,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.Unicode, nullable=False)
     refresh_token = db.Column(db.Unicode, nullable=True)
-
-    @cached_property
-    def token(self):
-        return OAuth2Response(
-            access_token=self.access_token, refresh_token=self.refresh_token)
+    expires_in = db.Column(db.Integer, nullable=True)
 
     @cached_property
     def user_info(self):
@@ -49,13 +45,21 @@ class User(UserMixin, db.Model):
         raise ValueError('%r is not valid size' % size)
 
     @classmethod
-    def from_oauth(cls, response):
+    def from_token(cls, response):
         user_id = response['douban_user_id']
         user = cls.query.get(user_id) or cls(id=user_id)
-        user.access_token = response.access_token
-        user.refresh_token = response.refresh_token
+        user.access_token = response['access_token']
+        user.refresh_token = response['refresh_token']
+        user.expires_in = response['expires_in']
         db.session.add(user)
         return user
+
+    @cached_property
+    def token(self):
+        return OAuth2Response(
+            access_token=self.access_token,
+            refresh_token=self.refresh_token,
+            expires_in=self.expires_in)
 
     @cached_property
     def secret_id(self):
@@ -85,10 +89,10 @@ def load_user(user_id):
 def obtain_token():
     if current_user.is_anonymous():
         return
-    return current_user.token_response
+    return current_user.token
 
 
 @douban.tokensaver
 def store_token(token):
-    User.from_oauth(token)
+    User.from_token(token)
     db.session.commit()
