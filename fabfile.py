@@ -16,4 +16,4 @@ def deploy():
         sudo(envvar_exec + 'python manage.py clean', user=remote_user)
         sudo(envvar_exec + 'python manage.py db upgrade', user=remote_user)
     for proc in remote_proc:
-        sudo('systemctl restart %s' % proc)
+        sudo('systemctl restart %s' % ' '.join(proc))
