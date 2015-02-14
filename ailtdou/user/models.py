@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.Unicode, nullable=False)
     refresh_token = db.Column(db.Unicode, nullable=True)
+    expires_in = db.Column(db.Integer, nullable=True)
 
     @cached_property
     def token(self):
