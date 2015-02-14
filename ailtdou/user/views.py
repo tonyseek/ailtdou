@@ -29,7 +29,7 @@ def authorized():
             request.args['error_reason'],
             request.args['error_description'])
 
-    user = User.from_oauth(response)
+    user = User.from_token(response)
     db.session.commit()
     login_user(user, remember=True)
 
