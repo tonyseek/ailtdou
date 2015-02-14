@@ -62,8 +62,7 @@ class User(UserMixin, db.Model):
         return OAuth2Response(
             access_token=self.access_token,
             refresh_token=self.refresh_token,
-            expires_in=self.expires_in or 0,
-            expires_at=self.expires_at or 0)
+            expires_at=self.expires_at or -1)
 
     @cached_property
     def secret_id(self):
