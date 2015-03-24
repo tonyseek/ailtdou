@@ -9,6 +9,13 @@ bp = Blueprint('user', __name__)
 douban = oauth['douban']
 
 
+@douban.errorhandler('missing_token')
+def handle_missing_token(error):
+    if not request:
+        return
+    return redirect(url_for('user.login'))
+
+
 @bp.route('/login')
 def login():
     callback_url = url_for('.authorized', _external=True)
