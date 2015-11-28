@@ -1,4 +1,5 @@
 import time
+import re
 
 from flask import current_app
 from flask_login import UserMixin, current_user
@@ -79,7 +80,10 @@ class User(UserMixin, db.Model):
 
     def post_to_douban(self, text):
         text = text.strip()
+        text, tail_link = _extract_tail_link(text)
         data = {'source': douban.client_id, 'text': text}
+        if tail_link is not None:
+            data['rec_url'] = tail_link
         return douban.post('/shuo/v2/statuses/', data=data, token=self.token)
 
 
@@ -99,3 +103,24 @@ def obtain_token():
 def store_token(token):
     User.from_token(token)
     db.session.commit()
+
+
+_re_http_url = re.compile(
+    r'https?://(?P<host>[^/:]+)(?P<port>:[0-9]+)?(?P<path>\/.*)?')
+
+
+def _extract_tail_link(text):
+    text = unicode(text)
+    matched = _re_http_url.search(text)
+
+    # there is not link
+    if matched is None:
+        return text, None
+
+    # link is not tail
+    start, stop = matched.span()
+    if len(text) != stop:
+        return text, None
+
+    # gotcha
+    return text.string[:start].strip(), text.string[start:].strip()
