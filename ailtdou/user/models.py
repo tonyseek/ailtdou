@@ -123,4 +123,4 @@ def _extract_tail_link(text):
         return text, None
 
     # gotcha
-    return text.string[:start].strip(), text.string[start:].strip()
+    return text[:start].strip(), text[start:].strip()
