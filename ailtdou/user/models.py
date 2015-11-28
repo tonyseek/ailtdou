@@ -80,10 +80,16 @@ class User(UserMixin, db.Model):
 
     def post_to_douban(self, text):
         text = text.strip()
-        text, tail_link = _extract_tail_link(text)
         data = {'source': douban.client_id, 'text': text}
-        if tail_link is not None:
-            data['rec_url'] = tail_link
+
+        _text, tag = _extract_info(text, 'head-tag')
+        _text, link = _extract_info(_text, 'tail-link')
+        if tag and link:
+            data['text'] = tag
+            data['rec_url'] = link
+            data['rec_title'] = _text
+            # data['rec_desc'] = _text
+
         return douban.post('/shuo/v2/statuses/', data=data, token=self.token)
 
 
@@ -105,22 +111,18 @@ def store_token(token):
     db.session.commit()
 
 
-_re_http_url = re.compile(
-    r'https?://(?P<host>[^/:]+)(?P<port>:[0-9]+)?(?P<path>\/.*)?')
+_re_rules = {
+    'head-tag': re.compile(r'^#.+#'),
+    'tail-link': re.compile(
+        r'https?://(?P<host>[^/:]+)(?P<port>:[0-9]+)?(?P<path>\/.*)?$'),
+}
 
 
-def _extract_tail_link(text):
+def _extract_info(text, rule):
     text = unicode(text)
-    matched = _re_http_url.search(text)
-
-    # there is not link
+    matched = _re_rules[rule].search(text)
     if matched is None:
         return text, None
-
-    # link is not tail
-    start, stop = matched.span()
-    if len(text) != stop:
-        return text, None
-
-    # gotcha
-    return text[:start].strip(), text[start:].strip()
+    else:
+        start, stop = matched.span()
+        return (text[:start] + text[stop:]).strip(), text[start:stop].strip()
