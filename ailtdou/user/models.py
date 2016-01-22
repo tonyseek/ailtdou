@@ -1,6 +1,8 @@
 import time
 import re
 
+import requests
+from requests.exceptions import RequestException
 from flask import current_app
 from flask_login import UserMixin, current_user
 from flask_oauthlib.contrib.client.structure import OAuth2Response
@@ -85,6 +87,7 @@ class User(UserMixin, db.Model):
         _text, tag = _extract_info(text, 'head-tag')
         _text, link = _extract_info(_text, 'tail-link')
         if tag and link:
+            link = _unshorten_url(link)
             data['text'] = tag
             data['rec_url'] = link
             data['rec_title'] = _text
@@ -126,3 +129,12 @@ def _extract_info(text, rule):
     else:
         start, stop = matched.span()
         return (text[:start] + text[stop:]).strip(), text[start:stop].strip()
+
+
+def _unshorten_url(url):
+    url = url.strip()
+    try:
+        r = requests.get(url, timeout=5)
+        return r.url
+    except RequestException:
+        return url
